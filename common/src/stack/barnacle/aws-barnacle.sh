@@ -7,6 +7,7 @@
 # @copyright@
 
 STACK=/opt/stack/bin/stack
+STACK_PY=/opt/stack/bin/python3
 
 # generate a new siteattrs from current network config
 # generate a new profile.sh
@@ -20,7 +21,21 @@ ifconfig       > /dev/console
 cat site.attrs > /dev/console
 
 
-$STACK list node xml server attrs=site.attrs > profile.xml
+
+VERSION=$($STACK_PY -c 'import stack; print(stack.version)')
+RELEASE=$($STACK_PY -c 'import stack; print(stack.release)')
+OS=''
+ARCH=$(uname -m)
+
+if [ -f /etc/redhat-release ]; then
+	OS=redhat
+elif [ -f /etc/SuSE-release ]; then
+	OS=sles
+fi
+
+PALLET_DIR=/export/stack/pallets/stacki/${VERSION}/${RELEASE}/${OS}/$ARCH/
+
+$STACK list node xml server attrs=site.attrs basedir=$PALLET_DIR > profile.xml
 cat profile.xml | $STACK list host profile chapter=main profile=bash > profile.sh 2>&1
 bash profile.sh > barnacle.log 2>&1
 
