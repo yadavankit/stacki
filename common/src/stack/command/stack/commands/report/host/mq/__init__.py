@@ -20,10 +20,13 @@ class Command(stack.commands.report.host.command):
 	"""
 
 	def run(self, params, args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		self.beginOutput()
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			self.addOutput(host,
 				       '<stack:file stack:name="/etc/sysconfig/stack-mq">')
 			self.addOutput(host, 'MASTER=%s' % self.getHostAttr(host, 'Kickstart_PrivateAddress'))

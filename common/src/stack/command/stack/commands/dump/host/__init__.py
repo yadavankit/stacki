@@ -46,7 +46,11 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			self.db.execute("""select 
 				n.rack, n.rank, a.longname, 
 				n.osaction, n.installaction

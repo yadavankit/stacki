@@ -59,7 +59,12 @@ class Command(stack.commands.remove.host.command):
 			raise ParamRequired(self, ('interface', 'mac'))
 
 		networks = ()
-		for host in self.getHostnames(args):
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			if all:
 				self.db.execute("""
 					select id from networks where

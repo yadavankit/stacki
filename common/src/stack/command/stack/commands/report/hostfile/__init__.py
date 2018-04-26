@@ -82,6 +82,9 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 		return(rows)
 
 	def run(self, params, args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		header = ['NAME', 'INTERFACE HOSTNAME', 'DEFAULT', 'APPLIANCE', 'RACK', 'RANK',
 			  'IP', 'MAC', 'INTERFACE', 'NETWORK', 'CHANNEL', 'OPTIONS', 'VLAN',
@@ -91,7 +94,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 		w = csv.writer(s)
 		w.writerow(header)
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			for r in self.doHost(host):
 				w.writerow(r)
 

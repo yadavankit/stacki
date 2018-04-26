@@ -39,6 +39,8 @@ class Command(command):
 
 		me    = self.db.getHostname()
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		# Don't allow the user to remove the host the command
 		# is running on.  Right now that means cannot remove

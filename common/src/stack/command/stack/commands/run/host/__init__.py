@@ -217,6 +217,9 @@ class Command(command):
 
 		# Get list of hosts to run the command on
 		self.hosts = self.getHostnames(args, self.str2bool(managed))
+		if not self.hosts:
+			return
+
 		self.run_hosts = self.getRunHosts(self.hosts)
 
 		# Get timeout for commands

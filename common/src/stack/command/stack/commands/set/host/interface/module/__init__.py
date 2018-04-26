@@ -51,11 +51,15 @@ class Command(stack.commands.set.host.command):
 
 		if not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 		
 		if module.upper() == 'NULL':
 			module = 'NULL'
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			if interface:
 				self.db.execute("""
 					update networks, nodes set 

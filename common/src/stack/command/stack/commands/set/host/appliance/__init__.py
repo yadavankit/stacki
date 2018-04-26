@@ -32,7 +32,11 @@ class Command(stack.commands.set.host.command,
 		if appliance not in self.getApplianceNames():
 			raise CommandError(self, 'appliance parameter not valid')
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			self.db.execute("""
 				update nodes set appliance=
 				(select id from appliances where name = '%s')

@@ -37,6 +37,9 @@ class Command(stack.commands.Command,
 
 	def run(self, params, args):
 		self.hosts = self.getHostnames(args)
+		if not self.hosts:
+			return
+
 		self.beginOutput()
 		
 		self.runPlugins()

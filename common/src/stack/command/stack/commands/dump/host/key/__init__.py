@@ -37,7 +37,11 @@ class Command(stack.commands.dump.host.command):
 	"""
 
 	def run(self, params, args):
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			self.db.execute("""select public_key from
 				public_keys where node = (select id from
 				nodes where name = '%s') """ % host)

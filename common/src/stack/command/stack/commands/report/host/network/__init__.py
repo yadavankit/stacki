@@ -33,6 +33,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 		
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		# Get os attribute for all hosts
 		a = hosts[:]

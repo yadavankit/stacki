@@ -40,6 +40,8 @@ class Command(stack.commands.Command,
 			])
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		if not interface and not network:
 			raise ParamRequired(self, ('interface', 'network'))

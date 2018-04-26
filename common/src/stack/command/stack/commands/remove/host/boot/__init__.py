@@ -61,4 +61,7 @@ class Command(stack.commands.remove.host.command):
 			raise ArgRequired(self, 'host')
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		self.runPlugins(hosts)

@@ -30,8 +30,12 @@ class Command(stack.commands.list.host.command):
 	def run(self, params, args):
 
 		self.beginOutput()
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 		
-		for host in self.getHostnames(args):
+		for host in hosts:
 			routes = self.db.getHostRoutes(host, 1)
 
 			for network in sorted(routes.keys()):

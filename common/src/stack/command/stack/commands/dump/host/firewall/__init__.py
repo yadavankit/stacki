@@ -42,7 +42,11 @@ class Command(stack.commands.dump.host.command,
 	"""
 
 	def run(self, params, args):
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			dumpname = self.dumpHostname(host)
 
 			rows = self.db.execute("""select tabletype, name, insubnet,

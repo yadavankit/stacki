@@ -23,9 +23,11 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 	"""
 
 	def run(self, params, args):
-		self.beginOutput()
-
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		self.beginOutput()
 		for host in hosts:
 
 			attrs = {}

@@ -40,7 +40,11 @@ class Command(stack.commands.add.host.command):
 			('message', None, True)
 			])
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			tx  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			msg = stack.mq.Message(channel, message)
 			

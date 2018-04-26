@@ -112,7 +112,11 @@ class Command(stack.commands.set.host.command):
 
 		adapter = 0
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			found = 0
 			for row in self.call('list.host.storage', [ host ]):
 				if row['enclosure'] == encid and \

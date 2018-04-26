@@ -54,7 +54,10 @@ class Command(stack.commands.sync.host.command):
 		self.notify('Sync Host Ansible Inventory\n')
 
 
-		hosts = self.getHostnames(args, managed_only=0)
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		run_hosts = self.getRunHosts(hosts)
 		me    = self.db.getHostname('localhost')
 

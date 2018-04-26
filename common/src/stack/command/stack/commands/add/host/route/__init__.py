@@ -56,6 +56,8 @@ class Command(stack.commands.add.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 		
 		(address, gateway, netmask, interface, syncnow) = self.fillParams([
 			('address', None, True),

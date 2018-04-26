@@ -40,7 +40,11 @@ class Command(stack.commands.remove.host.command,
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			sql = """node = (select id from nodes where
 				name = '%s')""" % (host)
 

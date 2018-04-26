@@ -96,6 +96,9 @@ class Command(stack.commands.load.command,
 		# imported spreadsheet.
 
 		hosts = self.getHostnames()
+		if not hosts:
+			return
+
 		for host in self.attrs.keys():
 			if host in hosts:
 				self.call('sync.host.config', [ host ])

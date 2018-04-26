@@ -48,7 +48,11 @@ class Command(stack.commands.set.host.interface.command):
 		if not interface and not network and not mac:
 			raise ParamRequired(self, ('interface', 'network', 'mac'))
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			valid = False
 			# Check validity of params. Match them against the
 			# values in the database to check params.

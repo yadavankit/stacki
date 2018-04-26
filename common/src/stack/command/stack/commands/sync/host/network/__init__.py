@@ -39,7 +39,10 @@ class Command(stack.commands.sync.host.command):
 
 		restartit = self.str2bool(restart)
 
-		hosts = self.getHostnames(args, managed_only=1)
+		hosts = self.getHostnames(args, managed_only=True)
+		if not hosts:
+			return
+
 		run_hosts = self.getRunHosts(hosts)
 
 		me = self.db.getHostname('localhost')

@@ -77,9 +77,11 @@ class Command(stack.commands.report.host.command):
 
 	def run(self, params, args):
 
-		self.beginOutput()
-
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		self.beginOutput()
 		for host in hosts:
 			osname = self.db.getHostOS(host)
 			self.runImplementation(osname, [host])

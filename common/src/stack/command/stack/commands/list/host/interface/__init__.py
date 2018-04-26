@@ -39,6 +39,10 @@ class Command(stack.commands.list.host.command):
 		expanded, = self.fillParams([ ('expanded', 'false') ])
 		expanded = self.str2bool(expanded)
 
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		networks = {}
 		if expanded:
 			for row in self.call('list.network'):
@@ -67,7 +71,7 @@ class Command(stack.commands.list.host.command):
 			"""):
 			data[row[0]].append(row[1:])
 			
-		for host in self.getHostnames(args):
+		for host in hosts:
 
 			for (network,
 			     interface,

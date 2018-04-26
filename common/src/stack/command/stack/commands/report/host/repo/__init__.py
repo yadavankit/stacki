@@ -31,10 +31,12 @@ class Command(stack.commands.HostArgumentProcessor,
 	"""
 
 	def run(self, params, args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		self.beginOutput()
 
-		hosts = self.getHostnames(args)
 		for host in hosts:
 			osname = self.db.getHostOS(host)
 			server = self.getHostAttr(host, 'Kickstart_PrivateAddress')

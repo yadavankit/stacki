@@ -53,7 +53,7 @@ class Command(stack.commands.remove.host.command):
 		if not len(hosts) == 1:
 			raise ArgUnique(self, 'host')
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			if not alias and not interface: 
 				self.db.execute("""
 					delete from aliases where 

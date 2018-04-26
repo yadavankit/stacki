@@ -69,8 +69,12 @@ class Command(stack.commands.list.host.command):
 		self.drawKey		= 1
 		self.drawLandscape	= self.str2bool(landscape)
 		self.drawSize		= size
-		
-		for host in self.getHostnames(args):
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 
 			box = None
 			for row in self.call('list.host', [ host ]):

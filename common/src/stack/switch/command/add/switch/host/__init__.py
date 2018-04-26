@@ -51,7 +51,8 @@ class Command(command):
 			raise ArgUnique(self, 'switch')
 
 		# Check if host exists
-		hosts = self.getHostnames([host])
+		if len(self.getHostnames([host])) != 1:
+			raise CommandError(self, 'Host "{}" matches more than one host'.format(host))
 
 		for switch in switches:
 			# Make sure switch has an interface

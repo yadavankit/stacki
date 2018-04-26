@@ -112,11 +112,14 @@ class Command(stack.commands.HostArgumentProcessor,
 
 	def run(self, params, args):
 
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		self.interface, = self.fillParams([('interface', ), ])
 		self.beginOutput()
 
 
-		hosts = self.getHostnames(args)
 		for host in hosts:
 			osname = self.getHostAttr(host, 'os')
 			self.runImplementation(osname, [host])

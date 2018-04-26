@@ -48,7 +48,9 @@ class Command(stack.commands.Command,
 
 	def run(self, params, args):
 		hosts = self.getHostnames(args)
-		
+		if not hosts:
+			return
+
 		(device, mountpoint, uuid,
 		sectorstart, size, partitionid,
 		fs, partitionflags, formatflags) = self.fillParams([

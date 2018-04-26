@@ -87,7 +87,9 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 		pidFile = '/var/run/stack-run-host-test.pid'
 		allpidFile = '/var/run/stack-run-host-test-all.pid'
 
-		hosts = self.getHostnames(args, managed_only = 1)
+		hosts = self.getHostnames(args, managed_only = True)
+		if not hosts:
+			return
 
 		(test_type, extras, status) = self.fillParams([
 			('test', None), ('extras', None), ('status', 'n')])

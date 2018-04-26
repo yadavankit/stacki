@@ -34,15 +34,17 @@ class Command(stack.commands.EnvironmentArgumentProcessor,
 			('environment', None, True)
 			])
 
-		print('set host environment', environment)
-		
 		if not len(args):
 			raise ArgRequired(self, 'host')
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		if environment and environment not in self.getEnvironmentNames():
 			raise CommandError(self, 'environment parameter not valid')
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			self.db.execute("""
 				update nodes set environment=
 				(select id from environments where name='%s')

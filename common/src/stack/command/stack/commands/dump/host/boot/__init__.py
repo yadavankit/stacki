@@ -23,7 +23,11 @@ class Command(stack.commands.dump.host.command):
 	"""
 
 	def run(self, params, args):
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			rows = self.db.execute("""select b.action from 
 				nodes n, boot b where n.id = b.node and
 				n.name = '%s' """ % host)

@@ -41,7 +41,10 @@ class Command(stack.commands.sync.host.command):
 		self.notify('Sync Host Repo\n')
 
 
-		hosts = self.getHostnames(args, managed_only=1)
+		hosts = self.getHostnames(args, managed_only=True)
+		if not hosts:
+			return
+
 		run_hosts = self.getRunHosts(hosts)
 		me    = self.db.getHostname('localhost')
 

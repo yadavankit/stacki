@@ -42,8 +42,12 @@ class Command(stack.commands.list.host.command):
 			('interface', None)
 			])
 
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		self.beginOutput()
-		for host in self.getHostnames(args):
+		for host in hosts:
 			if interface == None:
 				self.db.execute("""select device from networks where
 						node = (select id from nodes where name = '%s')

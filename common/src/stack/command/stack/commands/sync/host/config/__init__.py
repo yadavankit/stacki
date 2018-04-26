@@ -23,9 +23,11 @@ class Command(stack.commands.sync.host.command,
 		self.notify('Sync Host Config\n')
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 		attrs = {}
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			attrs[host] = {}
 		for row in self.call('list.host.attr', hosts):
 			attrs[row['host']][row['attr']] = row['value']

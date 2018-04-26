@@ -33,6 +33,9 @@ class Command(command):
 	def run(self, params, args):
 
 		self.hosts = self.getHostnames(args)
+		if not self.hosts:
+			return
+
 		_switches = self.getSwitchNames()
 		self.beginOutput()
 		for switch in self.call('list.host.interface', _switches):

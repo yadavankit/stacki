@@ -39,6 +39,8 @@ class Command(stack.commands.set.host.command):
 			hosts = []
 		else:
 			hosts = self.getHostnames(args)
+			if not hosts:
+				return
 
 		(flags, ) = self.fillParams( [('flags', None, True)] )
 			

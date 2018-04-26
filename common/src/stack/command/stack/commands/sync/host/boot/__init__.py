@@ -31,6 +31,9 @@ class Command(stack.commands.sync.host.command):
 
 		self.notify('Sync Host Boot\n')
 
-		argv = self.getHostnames(args, managed_only=True)
+		hosts = self.getHostnames(args, managed_only=True)
+		if not hosts:
+			return
+
 		argv.append('notify=true')
-		self.report('report.host.bootfile', argv)
+		self.report('report.host.bootfile', hosts)

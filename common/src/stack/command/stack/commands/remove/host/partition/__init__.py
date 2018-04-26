@@ -57,8 +57,12 @@ class Command(stack.commands.remove.host.command):
 			('partition', None),
 			('device', None),
 			('uuid', None)])
-			
-		for host in self.getHostnames(args):
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			conditions = []
 			sql_cmd = """delete from partitions where
 				node=(select id from nodes

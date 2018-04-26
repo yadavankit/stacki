@@ -231,7 +231,11 @@ class Plugin(stack.commands.Plugin):
 				'type'], trimOwner=0)
 
 	def host_firewall(self, args):
-		for host in self.owner.getHostnames(args):
+		hosts = self.owner.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 
 			# global
 			self.global_firewall(args, host)

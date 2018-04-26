@@ -40,6 +40,10 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		if len(comment) > 140:
 			raise CommandError(self, 'comments must be no longer than 140 characters')
 

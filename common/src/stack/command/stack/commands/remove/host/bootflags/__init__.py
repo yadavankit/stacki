@@ -34,7 +34,11 @@ class Command(stack.commands.remove.host.command):
 		if len(args) == 0:
 			self.command('remove.attr', [ 'attr=bootflags' ])
 		else:
-			for host in self.getHostnames(args):
+			hosts = self.getHostnames(args)
+			if not hosts:
+				return
+
+			for host in hosts:
 				self.command('remove.host.attr', [ host,
 					'attr=bootflags' ])
 

@@ -45,6 +45,10 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		if action.lower() == 'none':
 			osaction = 'NULL'
 		else:
@@ -62,7 +66,7 @@ class Command(stack.commands.set.host.command):
 			# OSaction is now an ID, not a name so fetch it.
 			osaction, = self.db.fetchone()
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			self.db.execute("""
 				update nodes set osaction=%s
 				where name='%s'

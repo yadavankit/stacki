@@ -25,6 +25,8 @@ class Command(stack.commands.Command,
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args, managed_only=True)
+		if not hosts:
+			return
 
 		(action,) = self.fillParams([
 			('action', None)

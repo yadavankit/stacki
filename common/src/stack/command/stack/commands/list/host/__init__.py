@@ -41,6 +41,8 @@ class Command(command):
 		(order, ) = self.fillParams([ ('order', 'asc') ])
 		
 		hosts = self.getHostnames(args, order=order)
+		if not hosts:
+			return
 	    
 		header = [ 'host' ]
 		values = { }

@@ -52,9 +52,3 @@ class Command(stack.commands.add.command):
 		self.command('set.bootaction', self._argv + [ 'force=no' ])
 		return self.rc
 
-		#	
-		# regenerate all the pxe boot configuration files
-		# including the default.
-		#
-#		self.command('set.host.boot', self.getHostnames())
-

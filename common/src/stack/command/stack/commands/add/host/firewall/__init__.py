@@ -105,6 +105,8 @@ class Command(stack.commands.add.firewall.command,
 			raise ArgRequired(self, 'host')
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
 
 		for host in hosts:
 			sql = """node = (select id from nodes where

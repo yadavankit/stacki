@@ -39,6 +39,9 @@ class Command(stack.commands.list.host.command):
 		self.beginOutput()
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		membership = {}
 
 		for host in hosts:

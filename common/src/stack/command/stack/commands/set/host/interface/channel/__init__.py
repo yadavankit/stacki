@@ -58,7 +58,11 @@ class Command(stack.commands.set.host.command):
 		if channel.upper() == 'NULL':
 			channel = 'NULL'
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			if interface:
 				self.db.execute("""
 					update networks, nodes set 

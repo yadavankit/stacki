@@ -62,6 +62,9 @@ class Command(command):
 				hosts.append(host)
 		else:
 			hosts = self.getHostnames(args)
+
+		if not hosts:
+			return
 			
 		for host in hosts:
 			# Turn the wildcard '%' into the hostname, and '%%' into

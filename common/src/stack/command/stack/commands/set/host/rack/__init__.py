@@ -40,7 +40,11 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			self.db.execute("""
 				update nodes set rack='%s' where
 				name='%s'

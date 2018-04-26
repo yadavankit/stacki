@@ -50,7 +50,11 @@ class Command(stack.commands.remove.host.command):
 
 		syncnow = self.str2bool(syncnow)
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			res = self.db.execute("""
 			delete from node_routes where 
 			node = (select id from nodes where name='%s')

@@ -88,6 +88,9 @@ class Command(stack.commands.swap.host.command):
 			raise CommandError(self, 'must supply two interfaces')
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		for host in hosts:
 			mac = []
 

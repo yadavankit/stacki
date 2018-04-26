@@ -75,7 +75,11 @@ class Command(stack.commands.sync.host.command):
 				])
 
 		context = zmq.Context()
+
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		run_hosts = self.getRunHosts(hosts)
 		for h in run_hosts:
 			host = h['name']

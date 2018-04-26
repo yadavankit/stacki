@@ -46,8 +46,11 @@ class Command(stack.commands.list.host.command):
 			"""):
 			boot[h] = b
 
-		self.beginOutput()
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		self.beginOutput()
 		attrs = self.call('list.host.attr',hosts)
 		f_nukedisks = lambda x: x['attr'] == x['nukecontroller']
 		for host in hosts:

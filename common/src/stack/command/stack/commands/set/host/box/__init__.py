@@ -36,7 +36,11 @@ class Command(stack.commands.set.host.command,
 
 		self.getBoxNames([ box ])
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
+		for host in hosts:
 			self.db.execute("""update nodes set box=
 				(select id from boxes where name='%s')
 				where name='%s' """

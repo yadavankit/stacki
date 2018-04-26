@@ -62,6 +62,9 @@ class Command(stack.commands.set.host.command):
 			raise CommandError(self, 'bootaction %s does not exist' % req_action)
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		for host in hosts:
 			self.db.execute(
 				"""
