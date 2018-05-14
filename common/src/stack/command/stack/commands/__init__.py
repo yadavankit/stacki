@@ -28,12 +28,14 @@ from xml.sax import handler
 from xml.sax import make_parser
 from pymysql import OperationalError, ProgrammingError
 from functools import partial
+from collections import OrderedDict
 
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
 from stack.exception import CommandError, ParamRequired
 from stack.bool import str2bool, bool2str
+from stack.util import flatten
 
 _logPrefix = ''
 _debug     = False
@@ -67,27 +69,29 @@ def Debug(message, level=syslog.LOG_DEBUG):
 		
 Debug('__init__:commands')
 
+
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
 
 	def getOSNames(self, args=None):
-		list = []
+		oses = []
 		if not args:
-			args = ['%']		# find all appliances
+			args = ['%']		# find everything in table
 		for arg in args:
 			if arg == 'centos':
+				if 'redhat' in oses:
+					continue
 				arg = 'redhat'
-			for name, in self.db.select(
-					"""
-					name from oses 
-					where name like '%s' order by name
-					""" % arg):
-				list.append(name)
-			if len(list) == 0 and arg == '%':  # empty table is OK
+
+			query = 'name from oses where name like %s order by name'
+			results = flatten(self.db.select(query, [arg]))
+			if len(results) == 0 and arg == '%':  # empty table OK
 				continue
-			if len(list)  < 1:
-				raise CommandError(self, 'unknown os "%s"' % arg)
-		return list
+			elif len(results) < 1:
+				raise ArgNotFound(self, arg, 'OS')
+			oses.extend(results)
+
+		return sorted(OrderedDict.fromkeys(oses))
 
 	
 class EnvironmentArgumentProcessor:
@@ -97,16 +101,17 @@ class EnvironmentArgumentProcessor:
 	def getEnvironmentNames(self, args=None):
 		environments = []
 		if not args:
-			args = [ '%' ]		 # find all appliances
+			args = ['%']		# find everything in table
 		for arg in args:
-			found = False
-			for (envName, ) in self.db.select("name from environments where name like '%s'" % arg):
-				found = True
-				environments.append(envName)
-			if not found and arg != '%':
-				raise CommandError(self, 'unknown environment "%s"' % arg)
+			query = 'name from environments where name like %s'
+			results = flatten(self.db.select(query, [arg]))
+			if len(results) == 0 and arg == '%':  # empty table OK
+				continue
+			elif len(results) < 1:
+				raise ArgNotFound(self, arg, 'environment')
+			environments.extend(results)
 
-		return environments
+		return sorted(OrderedDict.fromkeys(environments))
 
 
 class ApplianceArgumentProcessor:
@@ -149,12 +154,10 @@ class BoxArgumentProcessor:
 			args = [ '%' ]		      # find all boxes
 
 		for arg in args:
-			found = False
-			for (boxName, ) in self.db.select("name from boxes where name like '%s'" % arg):
-				found = True
-				boxes.append(boxName)
-			if not found and arg != '%':
-				raise CommandError(self, 'unknown box "%s"' % arg)
+			query = 'name from boxes where name like %s'
+			boxes = flatten(self.db.select(query, [arg]))
+			if not boxes and arg != '%':
+				raise ArgNotFound(self, arg, 'box')
 
 		return boxes
 
@@ -1228,11 +1231,9 @@ class DatabaseConnection:
 		m.update(command.strip().encode('utf-8'))
 		k = m.hexdigest()
 
-#		 print 'select', k, command
 		if k in DatabaseConnection.cache:
 			Debug('select %s' % k)
 			rows = DatabaseConnection.cache[k]
-#			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
 		else:
 			try:
 				self.execute('select %s' % command)
