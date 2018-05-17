@@ -58,7 +58,6 @@ class Implementation(stack.commands.Implementation):
 				device = o['interface'].split(':')[0]
 				destination = 'default'
 				netmask = '0.0.0.0'
-
 				output = self.owner.call('list.network',
 					[ network ])
 				for n in output:
@@ -66,7 +65,6 @@ class Implementation(stack.commands.Implementation):
 
 					self.owner.addOutput(host, '%s\t%s\t%s\t%s' % (destination, gateway, netmask, device))
 					break
-
 				break
 
 		self.owner.addOutput(host, '</stack:file>')

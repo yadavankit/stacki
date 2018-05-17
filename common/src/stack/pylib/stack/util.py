@@ -41,34 +41,34 @@ class KickstartNodeError(KickstartError):
 
 
 class Struct:
-    pass
+	pass
 
 
 def list2str(list):
-    s = ''
-    for e in list:
-        s = s + e
-    return s
+	s = ''
+	for e in list:
+		s = s + e
+	return s
 
 
 def listcmp(l1, l2):
-    return map(lambda a, b: a == b, l1, l2)
+	return map(lambda a, b: a == b, l1, l2)
 
 
 def listdup(e, n):
-    l = []
-    for i in range(0, n):
-        l.append(e)
-    return l
+	l = []
+	for i in range(0, n):
+		l.append(e)
+	return l
 
 
 def list_isprefix(l1, l2):
-    l = listcmp(l1, l2)
-    for i in range(0, len(l1)):
-        if not l[i]:
-            return 0
-    return 1
-        
+	l = listcmp(l1, l2)
+	for i in range(0, len(l1)):
+		if not l[i]:
+			return 0
+	return 1
+		
 
 
 def getNativeArch():
@@ -90,7 +90,7 @@ def mkdir(newdir):
 		pass
 	elif os.path.isfile(newdir):
 		raise OSError("a file with the same name as the desired dir, '%s', already exists." % 
-			      newdir)
+				  newdir)
 	else:
 		head, tail = os.path.split(newdir)
 		if head and not os.path.isdir(head):
@@ -101,9 +101,9 @@ def mkdir(newdir):
 
 
 class ParseXML(handler.ContentHandler,
-	       handler.DTDHandler,
-	       handler.EntityResolver,
-	       handler.ErrorHandler):
+		   handler.DTDHandler,
+		   handler.EntityResolver,
+		   handler.ErrorHandler):
 	"""A helper class to for XML parsers. Uses our
 	startElement_name style."""
 
@@ -156,9 +156,9 @@ def startSpinner(cmd):
 
 
 	p = subprocess.Popen(cmd,
-			     stdin=subprocess.PIPE,
-			     stdout=subprocess.PIPE,
-			     stderr=subprocess.PIPE)
+				 stdin=subprocess.PIPE,
+				 stdout=subprocess.PIPE,
+				 stderr=subprocess.PIPE)
 
 	currLength  = 0
 	prevLength  = 0
@@ -215,3 +215,23 @@ def prettyNumber(x):
 
 	return size
 
+
+def get_interfaces(skip_interfaces=None):
+	"""
+	get mac address for all interfaces present
+
+	:param skip_interfaces: list of existing interfaces to skip
+	:return: interface, hwaddr
+	"""
+
+	# In case we were passed a string:
+	if isinstance(skip_interfaces, str):
+		skip_interfaces = skip_interfaces.split(',')
+
+	for interface in os.listdir("/sys/class/net"):
+		# We want (i)nfiniband and (e)thernet interfaces, but skip the input interfaces.
+		if (interface.startswith("i") or interface.startswith("e")) and (interface not in skip_interfaces):
+			with open('/sys/class/net/' + interface + "/address") as mac:
+				hwaddr = mac.readline().strip()
+				# make this usable in a for loop. Fits better for stacki-profile.py usage
+				yield interface, hwaddr
