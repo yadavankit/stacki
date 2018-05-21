@@ -53,6 +53,19 @@ rm -f /etc/zypp/repos.d/*
 <stack:report stack:name="host.repo">&hostname;</stack:report>
 </stack:script>
 
+<stack:script stack:stage="boot-post">
+
+SERVER=&yumserver;
+if [ x"" == x$SERVER ]
+then
+	SERVER=&Kickstart_PrivateKickstartHost;
+fi
+
+ib0=$(/usr/sbin/ibstat -p | awk 'NR==1{print $1}')
+ib1=$(/usr/sbin/ibstat -p | awk 'NR==2{print $1}')
+
+/usr/bin/curl --insecure -o /dev/null https://$SERVER/install/sbin/public/setIBguids.cgi?params='\{"ib0guid":"'$ib0'","ib1guid":"'$ib1'"\}'
+</stack:script>
 
 <stack:script stack:stage="install-post" stack:cond="release == 'sles12'">
 <stack:report stack:name="host.interface">&hostname;</stack:report>

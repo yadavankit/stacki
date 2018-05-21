@@ -1,4 +1,4 @@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -11,6 +11,7 @@ from logging.handlers import RotatingFileHandler
 import asyncio
 import signal
 import sys
+import re
 
 
 # A custom exception just so its easier to differentiate from Switch exceptions and system ones
@@ -295,3 +296,240 @@ class SwitchDellX1052(Switch):
 
 	def set_tftp_ip(self, ip):
 		self.stacki_server_ip = ip
+
+
+class SwitchInfiniBand(object):
+	"""Class for interfacing with a Mellanox InfiniBand switch.
+	"""
+	_support_models = ["m7800"]
+
+	def __init__(self, switch_ip_address, switchname='switch', username='admin', password='TD-Mellanox7800'):
+		# Grab the user supplied info, in case there is a difference (PATCH)
+		self.switch_ip_address = switch_ip_address
+		self.username = username
+		self.password = password
+
+		self.stacki_server_ip = None
+		self.switchname = switchname
+
+	def __enter__(self):
+		# Entry point of the context manager
+		return self
+
+	def __exit__(self, *args):
+		try:
+			self.disconnect()
+		except AttributeError:
+			pass
+			## TODO: release file lock here
+
+	def _expect(self, look_for, custom_timeout=15):
+		""" Internal expect funtion to handle disconnections more gracefull."""
+		try:
+			self.child.expect(look_for, timeout=custom_timeout)
+		except pexpect.exceptions.TIMEOUT:
+			# print "Giving SSH time to close gracefully...",
+			for _ in range(9, -1, -1):
+				if not self.child.isalive():
+					break
+				time.sleep(1)
+			debug_info = str(str(self.child.before) + str(self.child.buffer) + str(self.child.after))
+			self.__exit__()
+			raise SwitchException(self.switch_ip_address + " expected output '" + look_for +
+							"' from SSH connection timed out after " +
+							str(custom_timeout) + " seconds.\nBuffer: " + debug_info)
+		except pexpect.exceptions.EOF:
+			self.__exit__()
+			raise SwitchException("SSH connection to " + self.switch_ip_address + " not available.")
+
+	def _yes(self):
+		"""Provide yes reply when needed"""
+		self._expect('Type .yes. to continue:')
+		self.child.sendline('yes')
+
+	def connect(self):
+		"""Connect to the switch"""
+		try:
+			self.child = pexpect.spawn('ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -tt ' +
+			                           self.username + "@" + self.switch_ip_address)
+			self._expect('Password:')
+			self.child.sendline(self.password)
+			self._expect(' >')
+			self.child.sendline('terminal length 999')
+			self._expect(' >')
+			self.child.sendline('enable')
+			self._expect(' #')
+			self.child.sendline('configure terminal')
+			self._expect('.config. #')
+		except:
+			raise SwitchException("Couldn't connect to switch: " + self.switch_ip_address)
+
+	def disconnect(self):
+		# if there isn't an exit status
+		# close the connection
+		if not self.child.exitstatus:
+			self.child.sendline('quit')
+			self.child.terminate()
+
+	def show_ib_sm(self):
+		try:
+			self.child.sendline('show ib sm')
+			self._expect('.config. #')
+			output = self.child.before
+			for line in output.splitlines():
+				if "enable" in str(line):
+					return "enable"
+
+			return "disable"
+		except:
+			raise SwitchException("Couldn't show subnet manager on: " + self.switch_ip_address)
+
+	def enable_ib_sm(self):
+		try:
+			self.child.sendline('ib sm')
+			self._expect('.config. #')
+		except:
+			raise SwitchException("Couldn't enable subnet manager on: " + self.switch_ip_address)
+
+	def disable_ib_sm(self):
+		try:
+			self.child.sendline('no ib sm')
+			self._expect('.config. #')
+		except:
+			raise SwitchException("Couldn't disable subnet manager on: " + self.switch_ip_address)
+
+	def show_partition(self, partition=None):
+		if partition is None:
+			self.child.sendline('show ib partition')
+		else:
+			cmd = "show ib partition " + str(partition)
+			self.child.sendline(cmd)
+		
+		self._expect(' #')
+		output = self.child.before
+
+		# Filter output to get rid of expect garbage output
+		filter_output = ""
+		for line in output.splitlines():
+			if "show ib partition" in str(line) or \
+			   "Display partition information" in str(line) or \
+			   "Pipe through a command" in str(line) or \
+			   " (config)" in str(line) or \
+			   re.match("^b'<cr>|^b'\\\\", str(line)):
+				continue
+
+			pattern = re.compile("^b'|^b\"|'$|\"$")
+			filter_line = re.sub(pattern, "", str(line))
+			if len(filter_line) == 0:
+				continue
+
+			filter_output += filter_line + "\n"
+
+		if partition == "?":
+			self.child.sendline("")
+
+		return filter_output
+
+	def del_partition(self, partition):
+		cmd = "no ib partition " + str(partition) 
+		self.child.sendline(cmd)
+
+		# Need to confirm 'yes' if delete Default partition
+		if str(partition) == "Default":
+			self._yes()
+	
+	def _validate_pkey(self, pkey):
+		"""
+		Valid pkey values are between 0x000 (2) to 0x7FFE (32766) (inclusive)
+		0x7FFF is reserved for the Default partition.  0x0 is an invalid P_KEY
+		"""
+	
+		pkey = int(pkey)
+		if pkey < 2 and pkey > 32766:
+			return None
+
+		pkey = hex(pkey)
+		return pkey
+
+	def add_partition(self, partition='Default', pkey=None):
+
+		if str(partition) != "Default":
+			pkey = self._validate_pkey(pkey)
+			if pkey == None:
+				raise SwitchException("Invalided partition key")
+		
+		try:
+			if str(partition) == "Default":
+				self.child.sendline('no ib partition Default')
+				self._yes()
+				self.child.sendline('ib partition Default pkey 0x7fff force')
+				self.child.sendline('ib partition Default defmember limited force')
+				self.child.sendline('ib partition Default ipoib force')
+			else:
+				cmd = "ib partition " + str(partition) + " pkey " + pkey + " force"
+				self.child.sendline(cmd)
+		except:
+			raise SwitchException("Couldn't add partition " + partition + " on " + self.switch_ip_address)
+
+	def _validate_guid(self, guid):
+		"""
+		guid format range 00:00:00:00:00:00:00:00 - ff:ff:ff:ff:ff:ff:ff:ff
+		"""
+		guid_format = re.compile("([0-9a-fA-F][0-9a-fA-F]:){7}[0-9a-fA-F][0-9a-fA-F]")
+		guid_plain = re.compile("([0-9a-fA-F]){16}")
+		
+		guid = guid.lower()
+		guid = guid.replace("0x", "")
+
+		if guid_plain.match(guid):
+			new_guid = ""
+			for each in range(0, 16, 2):
+				new_guid += guid[each:each + 2] + ":"
+
+			guid = new_guid[:-1]
+		
+		if not guid_format.match(guid):
+			return None
+
+		return guid
+	
+	def show_partition_member(self, partition):
+		cmd = "show ib partition " + str(partition) + " member"
+		self.child.sendline(cmd)
+
+		self._expect(' #')
+		output = self.child.before
+		return output
+
+	def add_partition_member(self, partition, guid):
+
+		_guid = self._validate_guid(guid)
+		if _guid is None:
+			raise SwitchException("GUID " + str(guid) + " is not valid")
+	
+		output = self.show_partition(partition)
+		if "No partition named" in str(output):
+			raise SwitchException("Partition " + str(partition)  + " does not exist")
+	
+		try:
+			cmd = "ib partition " + partition + " member " + _guid + " type full force"
+			self.child.sendline(cmd)
+		except:
+			raise SwitchException("Couldn't add " + str(guid) + " to  partition " + str(partition))
+
+
+	def del_partition_member(self, partition, guid):
+
+		output = self.show_partition(partition)
+		if "No parttition named" in str(output):
+			raise SwitchException("Partition " + str(partition)  + " does not exist")
+		
+		_guid = self._validate_guid(guid)
+		if _guid is None:
+			raise SwitchException("GUID " + str(guid) + " is not valid")
+
+		try:
+			cmd = "no ib partition " + partition + " member " + _guid
+			self.child.sendline(cmd)
+		except:
+			raise SwitchException("Couldn't delete " + str(guid) + " from partition " + str(partition))
