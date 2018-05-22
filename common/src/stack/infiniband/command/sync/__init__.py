@@ -16,33 +16,14 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	Add backend(s) to Infiniband subnet managers
+	Add hosts' guid to Infiniband subnet managers
 
 	<example cmd="sync infiniband">
-	Reconfigure and set startup configuration on switch-0-0.
 	</example>
 	"""
 
-	def get_sm(self):
-		subnet_managers = []
-		for sm in self.call('list.switch.sm'):
-			if sm['subnet_manager'] == "enable":
-				switch_name = sm['switch']
-				subnet_managers.append(switch_name)
-
-		return subnet_managers
-
-
 	def run(self, params, args):
 
-		#persistent, = self.fillParams([
-		#	('persistent', False)
-		#	])
-
-		#self.persistent = self.str2bool(persistent)
-		#switches = self.getSwitchNames(args)
-	
-		subnet_managers = None
 		pdic = dict()
 		ib0_sm = None
 		ib1_sm = None

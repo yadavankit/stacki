@@ -14,7 +14,7 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	Remove a partition from InfiniBand switches which are subnet manager
+	Remove a partition from subnet managers
 
 	<param type='string' name='partition' optional='0'>
 	partition is the partition to remove from all subnet managers

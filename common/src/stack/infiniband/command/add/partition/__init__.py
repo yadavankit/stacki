@@ -14,7 +14,7 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	Add a partition to InfiniBand switches which are subnet manager
+	Add a partition to subnet managers
 
 	<param type='string' name='partition' optional='0'>
 	partition is the partition name
@@ -25,7 +25,7 @@ class Command(command):
 	</param>
 
 	<example cmd='add infiniband partition partition=coke key=2'>
-	Add partition 'coke' with key '0xf' to switch m7800-1-1-1-18
+	Add partition 'coke' with key '2' to subnet manager(s)
 	</example>
 	"""
 
