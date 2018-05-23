@@ -13,8 +13,9 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 
 		switch = args[0]
-		switch_address = switch['ip']
-		switch_name = switch['host']
+		switch_name = switch['switch']
+		switch_interface, *xargs = self.owner.call('list.host.interface', [switch_name])
+		switch_address = switch_interface['ip']
 		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 
