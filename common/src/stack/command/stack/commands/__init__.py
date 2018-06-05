@@ -237,16 +237,19 @@ class SwitchArgumentProcessor:
 		if not args:
 			args = ['%'] # find all switches
 		for arg in args:
-			rows = self.db.execute("""
-			select name from nodes
-			where name like '%s' and
-			appliance=(select id from appliances where name='switch')
-			""" % arg)
-
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			for name, in self.db.fetchall():
+			found = False
+			for (name, ) in self.db.select("""
+				n.name from
+				nodes n, appliances a where
+				n.appliance = a.id and
+				a.name = 'switch'  and
+				n.name like %s
+				order by rack, rank
+				""", (arg)):
+				found = True
 				switches.append(name)
+			if not found and arg != '%':
+				raise ArgNotFound(self, arg, 'switch')
 
 		return switches
 
