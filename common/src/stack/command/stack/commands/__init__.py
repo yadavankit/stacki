@@ -110,7 +110,7 @@ class EnvironmentArgumentProcessor:
 			elif len(results) < 1:
 				raise ArgNotFound(self, arg, 'environment')
 			environments.extend(results)
- 
+
 		return sorted(OrderedDict.fromkeys(environments))
 
 
