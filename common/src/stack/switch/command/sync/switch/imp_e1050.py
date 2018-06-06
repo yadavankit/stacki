@@ -7,6 +7,7 @@
 import pexpect
 import re
 import stack.commands
+<<<<<<< f8b9a699a5cbaedf3b6083c9c30a65b4866594f1
 
 
 def ssh_copy_id(imp, switch):
@@ -30,3 +31,4 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
 		ssh_copy_id(self, switch)
+
