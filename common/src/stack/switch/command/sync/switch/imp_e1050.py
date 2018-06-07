@@ -26,7 +26,6 @@ def ssh_copy_id(imp, switch):
 	except pexpect.EOF:
 		imp.owner.addOutput(f'{switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
 
-
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
