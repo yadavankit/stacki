@@ -6,7 +6,7 @@
 
 import re
 import stack.commands
-from stack.switch import SwitchCelesticaE1050  #, SwitchException
+from stack.switch import SwitchCelesticaE1050
 
 
 class Implementation(stack.commands.Implementation):
@@ -31,3 +31,4 @@ class Implementation(stack.commands.Implementation):
 
 						self.owner.addOutput(switch_name,
 						                    [port, iface_obj['mac'], '', iface, vlan])  # host missing, switch hostfile?
+
