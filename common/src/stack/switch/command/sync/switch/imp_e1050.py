@@ -30,13 +30,4 @@ def ssh_copy_id(imp, switch):
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
-
-		try:
-			(frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost'])
-                                 if host['network'] == switch['network']]
-			# note: spaces in above line continuation despite purported conversion to tabs
-		except:
-			raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])
-
 		ssh_copy_id(self, switch)
-
