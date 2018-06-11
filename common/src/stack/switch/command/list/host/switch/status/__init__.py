@@ -18,7 +18,7 @@ class Command(command):
 	List information about a switch's port(s) that a host(s) is connected to.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
-	Zero, one or more host names. If no hosts names are supplies, info about
+	Zero, one or more host names. If no hosts names are supplied, info about
 	all the known hosts is listed.
 	</arg>
 
@@ -38,7 +38,7 @@ class Command(command):
 		for switch in self.call('list.host.interface', _switches):
 
 			switch_name = switch['host']
-			model = self.getHostAttr(switch_name, 'switch_model')
+			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
 
 		self.endOutput(header=['host', 'mac', 'interface', 'vlan', 'switch', 'port', 'speed', 'state'])
