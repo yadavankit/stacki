@@ -21,6 +21,7 @@ def ssh_copy_id(imp, switch):
 		child.expect('password')
 		child.sendline(switch_password)
 		child.expect(pexpect.EOF)
+
 		imp.owner.addOutput(f'{switch_name}:', re.search(r'Number of (.+)', child.before.decode('utf-8')).group())
 	except pexpect.EOF:
 		imp.owner.addOutput(f'{switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
