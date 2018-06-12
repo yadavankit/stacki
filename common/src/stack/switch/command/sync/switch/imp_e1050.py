@@ -15,14 +15,16 @@ def ssh_copy_id(imp, switch):
 	switch_username = imp.owner.getHostAttr(switch_name, 'switch_username')
 	switch_password = imp.owner.getHostAttr(switch_name, 'switch_password')
 
+	# handle invalid creds?
 	child = pexpect.spawn(f'ssh-copy-id -i /root/.ssh/id_rsa.pub {switch_username}@{switch_address}')
 	try:
 		child.expect('password')
 		child.sendline(switch_password)
 		child.expect(pexpect.EOF)
-		print(re.search(r'Number of (.+)', child.before.decode('utf-8')).group())
+
+		imp.owner.addOutput(f'{switch_name}:', re.search(r'Number of (.+)', child.before.decode('utf-8')).group())
 	except pexpect.EOF:
-		print(re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
+		imp.owner.addOutput(f'{switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
 
 
 class Implementation(stack.commands.Implementation):
