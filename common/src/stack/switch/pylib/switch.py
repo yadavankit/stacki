@@ -3,14 +3,20 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import os
-import time
-import pexpect
+import asyncio
+from itertools import groupby
+import json
 import logging
 from logging.handlers import RotatingFileHandler
-import asyncio
+import os
+import pexpect
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import signal
 import sys
+import time
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 # A custom exception just so its easier to differentiate from Switch exceptions and system ones
@@ -295,3 +301,23 @@ class SwitchDellX1052(Switch):
 
 	def set_tftp_ip(self, ip):
 		self.stacki_server_ip = ip
+
+
+class SwitchCelesticaE1050(Switch):
+	"""Class for interfacing with a Celestica e1050 switch running Cumulus Linux.
+	"""
+
+	@staticmethod  # needed?
+	def natural_sort(s):
+		return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
+
+	def rpc_req_text(self, cmd):
+		url = f'https://{self.switch_ip_address}:8080/nclu/v1/rpc'
+		payload = {"cmd": cmd}
+		auth = (self.username, self.password)
+		headers = {'Content-Type': 'application/json'}
+
+		return requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text
+
+	def sorted_json(self, cmd):
+		return sorted(json.loads(self.rpc_req_text(cmd)), key=self.natural_sort)
