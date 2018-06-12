@@ -19,7 +19,7 @@ class Command(command):
 	about each port on the switch.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
-	Zero, one or more switch names. If no switch names are supplies, info about
+	Zero, one or more switch names. If no switch names are supplied, info about
 	all the known switches is listed.
 	</arg>
 
