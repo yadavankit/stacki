@@ -18,7 +18,7 @@ class Command(command):
 	List information about a switch's port(s) that a host(s) is connected to.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
-	Zero, one or more host names. If no hosts names are supplied, info about
+	Zero, one or more host names. If no host names are supplied, info about
 	all the known hosts is listed.
 	</arg>
 

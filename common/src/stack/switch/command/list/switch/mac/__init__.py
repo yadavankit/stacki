@@ -51,4 +51,4 @@ class Command(command):
 			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
 
-		self.endOutput(header=['switch', 'port',  'mac', 'host', 'interface', 'vlan'])
+		self.endOutput(header=['switch', 'port', 'mac', 'host', 'interface', 'vlan'])
