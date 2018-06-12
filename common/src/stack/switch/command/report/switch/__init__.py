@@ -18,7 +18,7 @@ class Command(command):
 	Output the switch configuration file to tftp directory.
 
 	<example cmd='report switch'>
-	Outputs data for /tftpboot/pxelunux/upload
+	Outputs data for /tftpboot/pxelinux/upload
 	</example>
 	"""
 
