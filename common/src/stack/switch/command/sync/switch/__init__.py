@@ -54,8 +54,11 @@ class Command(command):
 		# Run report switch
 		self.report('report.switch')
 
+		self.beginOutput()
 		for switch in self.call('list.host.interface', switches):
 
 			switch_name = switch['host']
 			model = self.getHostAttr(switch_name, 'switch_model')
 			self.runImplementation(model, [switch])
+
+		self.endOutput()
