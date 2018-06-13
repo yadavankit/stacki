@@ -4,42 +4,69 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-from itertools import groupby
 import json
 import re
-import requests
 import stack.commands
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def natural_sort(s):
-	return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
+class Implementation(stack.commands.Implementation):
+	def run(self, args):
+		switch = args[0]
 
+		switch_name = switch['host']
+		switch_address = switch['ip']
+		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
+''' derp
+		# better to get hosts from switch hostfile? also, 'net show bridge macs <ip>' suggests switch knows host ip
+		hosts = self.owner.call('list.host.interface', ['output-format=json'])
+		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
+			bm_iface_objs = {}
+			for bm_iface_obj in switch.json_loads(cmd="show bridge macs dynamic json"):
+				iface = bm_iface_obj.pop('dev')  # why did they call iface 'dev'?
+				bm_iface_objs[iface] = bm_iface_obj
 
-def net_show_interface(imp, switch):
-	switch_name = switch['host']
-	url = f'https://{switch["ip"]}:8080/nclu/v1/rpc'
-	payload = {"cmd": "show interface json"}
-	auth = (imp.owner.getHostAttr(switch_name, 'switch_username'),
-	        imp.owner.getHostAttr(switch_name, 'switch_password'))
-	headers = {'Content-Type': 'application/json'}
+			ifaces = switch.json_loads(cmd="show interface json")  # better name?
 
-	data = json.loads(requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text)
-	for iface in sorted(data, key=natural_sort):
+			for iface in switch.sorted_keys(ifaces):
+				if 'swp' in iface:
+					if_iface_obj = ifaces[iface]['iface_obj']
+
+					try:
+						bm_iface_obj = bm_iface_objs[iface]
+						mac = bm_iface_obj['mac']
+
+						for host_obj in hosts:
+							if host_obj['mac'] == mac:
+								host = host_obj['host']
+								interface = host_obj['interface']
+								break
+					except KeyError:
+						host = ''
+						interface = ''
+						mac = ''
+
+					port = re.search(r'\d+', iface).group()
+					speed = if_iface_obj['speed']
+					state = if_iface_obj['linkstate']
+					vlan = bm_iface_obj['vlan']  # should vlan come from FE or switch? Missing from FE atm
+
+					self.owner.addOutput(switch_name, [port, speed, state, mac, vlan, host, interface])
+'''
+
+''' old; current doesn't show inactive ports
+with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
+	data = switch.json_loads("show interface json")
+	for iface in switch.sorted_keys(data):
 		port_match = re.search(r'\d+', iface)
 		info = data[iface]
 		if 'swp' in iface:
 			iface_obj = info['iface_obj']
 
 			port = port_match.group()
+			# mac and interface are for host, but are stored in switch; figure out where
+			# should vlan come from FE or switch?
 			vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
 
-			imp.owner.addOutput(switch_name, [port, info['speed'], info['linkstate'], iface_obj['mac'], vlan, '', iface])  # host missing, switch hostfile?
-
-
-class Implementation(stack.commands.Implementation):
-	def run(self, args):
-		switch = args[0]
-		net_show_interface(self, switch)
+			self.owner.addOutput(switch_name, [port, info['speed'], info['linkstate'], iface_obj['mac'], vlan, '', iface])  # host missing, switch hostfile?
+'''
