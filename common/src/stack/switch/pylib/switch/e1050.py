@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from . import Switch
 from itertools import groupby
 import json
@@ -11,7 +12,7 @@ class SwitchCelesticaE1050(Switch):
 	"""Class for interfacing with a Celestica e1050 switch running Cumulus Linux.
 	"""
 
-	@staticmethod  # needed?
+	@staticmethod
 	def natural_sort(s):
 		return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
 
