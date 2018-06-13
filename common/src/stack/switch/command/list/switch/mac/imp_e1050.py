@@ -6,9 +6,10 @@
 
 import re
 import stack.commands
-from stack.switch import SwitchCelesticaE1050  #, SwitchException
+from stack.switch.e1050 import SwitchCelesticaE1050
 
 
+# similar to 'list switch status'; intentional? reusable?
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
@@ -18,16 +19,20 @@ class Implementation(stack.commands.Implementation):
 		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 
+		# better to get hosts from switch hostfile? also, 'net show bridge macs <ip>' suggests switch knows host IP
+		hosts = self.owner.call('list.host.interface', ['output-format=json'])
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
-			with switch.sorted_json("show interface json") as data:
-				for iface in data:
-					port_match = re.search(r'\d+', iface)
-					info = data[iface]
-					if 'swp' in iface and info['linkstate'] != 'DN':
-						iface_obj = info['iface_obj']
+			# better name(s)?
+			for iface_obj in sorted(switch.json_loads(cmd="show bridge macs dynamic json"), key=lambda d: d['dev']):  # why did they call iface 'dev'?
+				mac = iface_obj['mac']
+				port = re.search(r'\d+', iface_obj['dev']).group()
+				vlan = iface_obj['vlan']  # should VLAN come from FE or switch? Missing from FE atm
+				# multiple VLANs?
 
-						port = port_match.group()
-						vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
+				for host_obj in hosts:
+					if host_obj['mac'] == mac:
+						host = host_obj['host']
+						interface = host_obj['interface']
 
-						self.owner.addOutput(switch_name,
-						                    [port, iface_obj['mac'], '', iface, vlan])  # host missing, switch hostfile?
+						self.owner.addOutput(switch_name, [port, mac, host, interface, vlan])
+						break
