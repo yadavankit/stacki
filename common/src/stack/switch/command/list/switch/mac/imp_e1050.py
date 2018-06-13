@@ -6,9 +6,10 @@
 
 import re
 import stack.commands
-from stack.switch import SwitchCelesticaE1050
+from stack.switch.e1050 import SwitchCelesticaE1050
 
 
+# similar to 'list switch status'; intentional? reusable?
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
@@ -19,16 +20,17 @@ class Implementation(stack.commands.Implementation):
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
-			with switch.sorted_json("show interface json") as data:
-				for iface in data:
-					port_match = re.search(r'\d+', iface)
-					info = data[iface]
-					if 'swp' in iface and info['linkstate'] != 'DN':
-						iface_obj = info['iface_obj']
+			data = switch.json_loads("show interface json")
+			for iface in switch.sorted_keys(data):
+				port_match = re.search(r'\d+', iface)
+				info = data[iface]
+				if 'swp' in iface and info['linkstate'] != 'DN':
+					iface_obj = info['iface_obj']
 
-						port = port_match.group()
-						vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
+					port = port_match.group()
+					# mac and interface are for host, but are stored in switch; figure out where
+					# should vlan come from FE or switch?
+					vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
 
-						self.owner.addOutput(switch_name,
-						                    [port, iface_obj['mac'], '', iface, vlan])  # host missing, switch hostfile?
+					self.owner.addOutput(switch_name, [port, iface_obj['mac'], '', iface, vlan])  # host missing, switch hostfile?
 
