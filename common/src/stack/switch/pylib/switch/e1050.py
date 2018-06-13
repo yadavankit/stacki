@@ -7,7 +7,6 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-# might be unused
 def natural_sort(s):
 	return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
 
@@ -24,7 +23,6 @@ class SwitchCelesticaE1050(Switch):
 
 		return requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text
 
-	# might be unused
 	@staticmethod
 	def sorted_keys(dct):
 		return sorted(dct, key=natural_sort)
