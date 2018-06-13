@@ -1,3 +1,8 @@
+# Copyright (c) 2006 - 2017 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+
 from . import Switch, SwitchException
 import os
 import pexpect
@@ -251,3 +256,4 @@ class SwitchDellX1052(Switch):
 
 	def set_tftp_ip(self, ip):
 		self.stacki_server_ip = ip
+

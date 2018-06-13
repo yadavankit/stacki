@@ -26,3 +26,4 @@ class Implementation(stack.commands.Implementation):
 			else:
 				# data = json.loads(text)
 				self.owner.addOutput(switch_name, [])  # port, vlan, type -- these headers don't map well to the raw text
+

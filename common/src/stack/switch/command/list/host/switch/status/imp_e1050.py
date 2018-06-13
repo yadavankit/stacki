@@ -33,3 +33,4 @@ class Implementation(stack.commands.Implementation):
 
 					self.owner.addOutput('?', [iface_obj['mac'], iface, vlan, switch_name, port, info['speed'],
 					                          info['linkstate']])  # host missing, switch hostfile?
+

@@ -33,3 +33,4 @@ class Implementation(stack.commands.Implementation):
 					vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
 
 					self.owner.addOutput(switch_name, [port, iface_obj['mac'], '', iface, vlan])  # host missing, switch hostfile?
+
