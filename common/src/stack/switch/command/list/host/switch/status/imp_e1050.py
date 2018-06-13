@@ -18,19 +18,27 @@ class Implementation(stack.commands.Implementation):
 		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 
-		hostnames = self.owner.hosts
+		# better to get hosts from switch hostfile? also, 'net show bridge macs <ip>' suggests switch knows host IP
+		hosts = self.owner.call('list.host.interface', ['output-format=json'])
 
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
-			data = switch.json_loads("show interface json")
-			for iface in switch.sorted_keys(data):
-				port_match = re.search(r'\d+', iface)
-				info = data[iface]
-				if 'swp' in iface:  # and host (switch hostfile) in hostnames
-					iface_obj = info['iface_obj']
+			# better name(s)?
+			interfaces = switch.json_loads(cmd="show interface json")
 
-					port = port_match.group()
-					vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
+			for iface_obj in sorted(switch.json_loads(cmd="show bridge macs dynamic json"), key=lambda d: d['dev']):  # why did they call iface 'dev'?
+				mac = iface_obj['mac']
+				port = re.search(r'\d+', iface_obj['dev']).group()
+				vlan = iface_obj['vlan']  # should VLAN come from FE or switch? Missing from FE atm
+				# TODO: multiple VLANs?
 
-					self.owner.addOutput('?', [iface_obj['mac'], iface, vlan, switch_name, port, info['speed'],
-					                          info['linkstate']])  # host missing, switch hostfile?
+				speed = interfaces[iface_obj['dev']]['speed']
+				state = interfaces[iface_obj['dev']]['linkstate']
 
+				for host_obj in hosts:
+					if host_obj['mac'] == mac:
+						host = host_obj['host']
+						interface = host_obj['interface']
+
+
+						self.owner.addOutput(host, [mac, interface, vlan, switch_name, port, speed, state])
+						break
