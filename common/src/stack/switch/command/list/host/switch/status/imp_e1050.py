@@ -4,44 +4,35 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-from itertools import groupby
 import json
 import re
-import requests
 import stack.commands
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-
-def natural_sort(s):
-	return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
-
-
-def blah(imp, switch):
-	hostnames = imp.owner.hosts
-
-	switch_name = switch['host']
-	url = f'https://{switch["ip"]}:8080/nclu/v1/rpc'
-	payload = {"cmd": "show interface json"}
-	auth = (imp.owner.getHostAttr(switch_name, 'switch_username'),
-	        imp.owner.getHostAttr(switch_name, 'switch_password'))
-	headers = {'Content-Type': 'application/json'}
-
-	data = json.loads(requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text)
-	for iface in sorted(data, key=natural_sort):
-		port_match = re.search(r'\d+', iface)
-		info = data[iface]
-		if 'swp' in iface:  # and host (switch hostfile) in hostnames
-			iface_obj = info['iface_obj']
-
-			port = port_match.group()
-			vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
-
-			imp.owner.addOutput('?', [iface_obj['mac'], iface, vlan, switch_name, port, info['speed'], info['linkstate']])  # host missing, switch hostfile?
 
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
-		blah(self, switch)
+		# better to get hosts from switch hostfile? also, 'net show bridge macs <ip>' suggests switch knows host IP
+		hosts = self.owner.call('list.host.interface', ['output-format=json'])
+
+		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
+			# better name(s)?
+			interfaces = switch.json_loads(cmd="show interface json")
+
+			for iface_obj in sorted(switch.json_loads(cmd="show bridge macs dynamic json"), key=lambda d: d['dev']):  # why did they call iface 'dev'?
+				mac = iface_obj['mac']
+				port = re.search(r'\d+', iface_obj['dev']).group()
+				vlan = iface_obj['vlan']  # should VLAN come from FE or switch? Missing from FE atm
+				# TODO: multiple VLANs?
+
+				speed = interfaces[iface_obj['dev']]['speed']
+				state = interfaces[iface_obj['dev']]['linkstate']
+
+				for host_obj in hosts:
+					if host_obj['mac'] == mac:
+						host = host_obj['host']
+						interface = host_obj['interface']
+
+
+						self.owner.addOutput(host, [mac, interface, vlan, switch_name, port, speed, state])
+						break
