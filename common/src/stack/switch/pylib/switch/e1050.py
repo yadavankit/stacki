@@ -7,13 +7,13 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def natural_sort(s):
-	return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
-
-
 class SwitchCelesticaE1050(Switch):
 	"""Class for interfacing with a Celestica e1050 switch running Cumulus Linux.
 	"""
+
+	@staticmethod  # needed?
+	def natural_sort(s):
+		return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
 
 	def rpc_req_text(self, cmd):
 		url = f'https://{self.switch_ip_address}:8080/nclu/v1/rpc'

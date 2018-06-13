@@ -4,35 +4,32 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import json
 import re
 import stack.commands
+from stack.switch.e1050 import SwitchCelesticaE1050
 
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
-		# better to get hosts from switch hostfile? also, 'net show bridge macs <ip>' suggests switch knows host IP
-		hosts = self.owner.call('list.host.interface', ['output-format=json'])
+
+		switch_name = switch['host']
+		switch_address = switch['ip']
+		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
+
+		hostnames = self.owner.hosts
 
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
-			# better name(s)?
-			interfaces = switch.json_loads(cmd="show interface json")
+			data = switch.json_loads("show interface json")
+			for iface in switch.sorted_keys(data):
+				port_match = re.search(r'\d+', iface)
+				info = data[iface]
+				if 'swp' in iface:  # and host (switch hostfile) in hostnames
+					iface_obj = info['iface_obj']
 
-			for iface_obj in sorted(switch.json_loads(cmd="show bridge macs dynamic json"), key=lambda d: d['dev']):  # why did they call iface 'dev'?
-				mac = iface_obj['mac']
-				port = re.search(r'\d+', iface_obj['dev']).group()
-				vlan = iface_obj['vlan']  # should VLAN come from FE or switch? Missing from FE atm
-				# TODO: multiple VLANs?
+					port = port_match.group()
+					vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
 
-				speed = interfaces[iface_obj['dev']]['speed']
-				state = interfaces[iface_obj['dev']]['linkstate']
-
-				for host_obj in hosts:
-					if host_obj['mac'] == mac:
-						host = host_obj['host']
-						interface = host_obj['interface']
-
-
-						self.owner.addOutput(host, [mac, interface, vlan, switch_name, port, speed, state])
-						break
+					self.owner.addOutput('?', [iface_obj['mac'], iface, vlan, switch_name, port, info['speed'],
+					                          info['linkstate']])  # host missing, switch hostfile?
