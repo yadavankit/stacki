@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import json
 import re
 import stack.commands
+from stack.switch.e1050 import SwitchCelesticaE1050
 
 
 class Implementation(stack.commands.Implementation):
