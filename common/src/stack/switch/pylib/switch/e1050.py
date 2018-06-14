@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from . import Switch
 from itertools import groupby
 import json
