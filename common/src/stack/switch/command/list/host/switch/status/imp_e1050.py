@@ -42,4 +42,3 @@ class Implementation(stack.commands.Implementation):
 
 						self.owner.addOutput(host, [mac, interface, vlan, switch_name, port, speed, state])
 						break
-
