@@ -7,12 +7,20 @@
 import re
 import stack.commands
 from stack.switch.e1050 import SwitchCelesticaE1050
+import subprocess
 
 
 # similar to 'list switch status'; intentional? reusable?
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
+
+		# TODO: FE has to see BEs over 10.2.232 network (currently can't)
+		if self.owner.pinghosts:
+			_host_interfaces = [host for host in self.owner.call('list.host.interface')
+					if host['network'] == switch['network']]
+			for host in _host_interfaces:
+				subprocess.run(['ping', '-c', '1', host['ip']])  # , stdout=subprocess.PIPE
 
 		switch_name = switch['host']
 		switch_address = switch['ip']
