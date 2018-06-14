@@ -15,6 +15,7 @@ class SwitchCelesticaE1050(Switch):
 	"""Class for interfacing with a Celestica e1050 switch running Cumulus Linux.
 	"""
 
+	# split into post and text functions? 'stack sync switch' uses post but doesn't care about return text
 	def rpc_req_text(self, cmd):
 		url = f'https://{self.switch_ip_address}:8080/nclu/v1/rpc'
 		payload = {"cmd": cmd}
