@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import subprocess
@@ -134,3 +135,52 @@ def add_host(hostname='backend-0-0', rack='1', rank='1', appliance='backend'):
 		pytest.fail('unable to add a dummy host')
 
 	yield
+
+@pytest.fixture
+def set_host_interface(add_host):
+	result = subprocess.run(
+		["stack", "list", "network", "private", "output-format=json"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+
+	o = json.loads(result.stdout)
+	addr = o[0]["address"]
+	mask = o[0]["mask"]
+
+	result = subprocess.run(
+		["stack", "list", "host", "a:backend", "output-format=json"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	o = json.loads(result.stdout)
+	hostname = o[0]["host"]
+
+	result = subprocess.run(
+		["stack", "list", "host", "interface", "output-format=json"]
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	
+	o = json.loads(result.stdout)
+	ip_list = []
+	interface = None
+
+	for line in o:
+		if line['host'] == hostname:
+			interface = line['interface']
+		
+		# Make list of IP addresses
+		ip_list.append(line['ip'])
+
+	result = {
+		'hostname': hostname,
+		'net_addr': addr,
+		'net_mask': mask,
+		'ip_list' : ip_list
+	}
+
+	return result
