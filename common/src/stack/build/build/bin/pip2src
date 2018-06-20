@@ -57,18 +57,20 @@ class Scanner:
 			meta = {}
 			with open(os.path.join(path, 'METADATA'), 'r') as text:
 				for line in text:
-					if 'Name:' in line or 'Version:' in line:
-						key, value = line.strip().split(':')
-						meta[key.strip().lower()] = value.strip()
+					line = line.strip()
+					if line.startswith('Name:') or line.startswith('Version:'):
+						key, value = line.split(':')
+						meta[key.lower()] = value.strip()
 
 		package = Package(meta['name'])
 		package.version = meta['version']
+		print('\t\tname=%s version=%s' % (package.name, package.version))
 		self.packages.append(package)
 
 
 	def readEgg(self, path):
 		print('\tfound egg %s' % os.path.split(path)[-1])
-		os.system('cat %s' % os.path.join(path, 'PKG-INFO'))
+#		os.system('cat %s' % os.path.join(path, 'PKG-INFO'))
 		with open(os.path.join(path, 'PKG-INFO'), 'r', encoding='utf-8') as text:
 			for line in text:
 				tokens = line.split(':', 1)
@@ -79,6 +81,7 @@ class Scanner:
 						version = tokens[1].strip()
 		package = Package(name)
 		package.version = version
+		print('\t\tname=%s version=%s' % (package.name, package.version))
 		self.packages.append(package)
 		
 
@@ -141,6 +144,13 @@ for pkgname in pkgnames:
 			else:
 				package.bootstrap = PackageSet[pkgname].bootstrap
 				PackageSet[pkgname].dependencies.append(package)
+				if package.name in PackageSet:
+					# package was already found or may be
+					# in the package.json
+					print('\t%s already processed' % package.name)
+					package.master = PackageSet[package.name].master
+					if package.version != PackageSet[package.name].version:
+						print('ERROR - Conficting version for %s' % package.name)
 				PackageSet[package.name] = package
 				
 
