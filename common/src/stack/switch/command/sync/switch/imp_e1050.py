@@ -42,7 +42,7 @@ class Implementation(stack.commands.Implementation):
 
 			# better names?
 			mac_ifaces = {}
-			for item in self.owner.call('list.switch.mac', ['output-format=json']):  # pinghost=True (broken)
+			for item in self.owner.call('list.switch.mac', ['output-format=json']):  # pinghost=True (broken), maybe unneeded
 				mac_ifaces[item['mac']] = {'iface': 'swp' + item['port'], 'vlan': item['vlan']}  # add vlan at this point or not?
 				# if so, why not just rpc_req_text here? all the info is here
 				# but might 'list switch mac' include non-vlan ports in the future?
