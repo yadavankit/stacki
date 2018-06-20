@@ -296,49 +296,56 @@ class SwitchArgumentProcessor:
 
 		if not switch_network:
 			raise CommandError(self,
-				"switch '%s' doesn't have an interface" % switch)
+				"switch %s doesn't have an interface", switch)
 
-		# Get the interface of the host that is on the same
-		# network as the switch
+		# new
+		host_interface = self.db.select("""
+			id from networks
+			where node=(select id from nodes where name=%s)
+			and device=%s
+			""", (host, interface))
 
-		# If the user entered an interface
-		if interface:
-			host_interface = self.db.select("""
-				id from networks
-				where subnet='%s'
-				and node=(select id from nodes where name='%s')
-				and device='%s'
-				""" % (switch_network[0][0],  host, interface))
-
-			if not host_interface:
-				raise CommandError(self,
-					"Interface '%s' isn't on a network with '%s'"
-					% ( interface, switch ))
-
-		# Grab the interface, if there is one, that is on the same network
-		# as the switch
-		else:
-			host_interface = self.db.select("""
-				id from networks where subnet='%s' and
-				node=(select id from nodes where name='%s')
-				""" % (switch_network[0][0],  host))
-
-			if not host_interface:
-				raise CommandError(self,
-					"host '%s' is not on a network with switch '%s'"
-					% ( host, switch ))
-
-		# Check if the port is already managed by the switch
-		rows = self.db.select("""
-			* from switchports
-			where port='%s'
-			and switch=(select id from nodes where name='%s')
-			""" % (port, switch))
-
-		if rows:
-			raise CommandError(self,
-				"Switch '%s' is alredy managing a host on port '%s'"
-				% (switch, port))
+		# # Get the interface of the host that is on the same
+		# # network as the switch
+		#
+		# # If the user entered an interface
+		# if interface:
+		# 	host_interface = self.db.select("""
+		# 		id from networks
+		# 		where subnet='%s'
+		# 		and node=(select id from nodes where name='%s')
+		# 		and device='%s'
+		# 		""" % (switch_network[0][0],  host, interface))
+		#
+		# 	if not host_interface:
+		# 		raise CommandError(self,
+		# 			"Interface '%s' isn't on a network with '%s'"
+		# 			% ( interface, switch ))
+		#
+		# # Grab the interface, if there is one, that is on the same network
+		# # as the switch
+		# else:
+		# 	host_interface = self.db.select("""
+		# 		id from networks where subnet='%s' and
+		# 		node=(select id from nodes where name='%s')
+		# 		""" % (switch_network[0][0],  host))
+		#
+		# 	if not host_interface:
+		# 		raise CommandError(self,
+		# 			"host '%s' is not on a network with switch '%s'"
+		# 			% ( host, switch ))
+		#
+		# # Check if the port is already managed by the switch
+		# rows = self.db.select("""
+		# 	* from switchports
+		# 	where port='%s'
+		# 	and switch=(select id from nodes where name='%s')
+		# 	""" % (port, switch))
+		#
+		# if rows:
+		# 	raise CommandError(self,
+		# 		"Switch '%s' is alredy managing a host on port '%s'"
+		# 		% (switch, port))
 
 		# if we got here, add the host to be managed switch
 		query = """
