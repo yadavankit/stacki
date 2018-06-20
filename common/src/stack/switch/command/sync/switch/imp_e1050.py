@@ -50,4 +50,6 @@ class Implementation(stack.commands.Implementation):
 			for host_iface in host_ifaces:
 				iface = mac_ifaces[host_iface['mac']]
 
-				switch.rpc_req_text(cmd=f"add interface {iface} bridge access {host_iface['vlan']}")
+				switch.rpc_req_text(cmd=f"add interface {iface['iface']} bridge access {host_iface['vlan']}")
+
+			# `net commit`
