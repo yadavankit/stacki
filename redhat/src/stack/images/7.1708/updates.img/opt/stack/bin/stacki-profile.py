@@ -22,7 +22,7 @@ interface_number = 0
 curlcmd = [ '/usr/bin/curl', '--local-port', '1-100',
 	'--output', '/tmp/stacki-profile.xml' ]
 
-for interface, hwaddr in get_interfaces("&Kickstart_PrivateInterface;"):
+for interface, hwaddr in get_interfaces():
 	if interface and hwaddr:
 		curlcmd.append('--header')
 		curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s' % (interface_number, interface, hwaddr))

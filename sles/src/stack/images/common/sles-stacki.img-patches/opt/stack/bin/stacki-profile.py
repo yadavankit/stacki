@@ -14,21 +14,6 @@ import os
 import json
 from stack.util import get_interfaces
 
-def get_ipmi_mac():
-	# Get IPMI mac
-	mac = None
-	p = subprocess.Popen(["/usr/bin/ipmitool", "lan","print","1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	o, e = p.communicate()
-
-	if not o:
-		return None
-
-	for line in o.decode().split('\n'):
-		if line.startswith("MAC Address"):
-			k, v = line.split(":",1)
-			mac = v.strip()
-
-	return mac
 
 debug = open('/tmp/stacki-profile.debug', 'w')
 
@@ -59,16 +44,12 @@ curlcmd = [ '/usr/bin/curl', '-s', '-w', '%{http_code}', '--local-port', '1-100'
 	'--output', '/tmp/stacki-profile.xml', '--insecure' ]
 
 
-for interface, hwaddr in get_interfaces("&Kickstart_PrivateInterface;"):
+for interface, hwaddr in get_interfaces():
 	if interface and hwaddr:
 		curlcmd.append('--header')
 		curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s' % (interface_number, interface, hwaddr))
 		interface_number += 1
 
-if ipmi_mac:
-	curlcmd.append('--header')
-	curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
-			% (interface_number, "ipmi", ipmi_mac))
 #
 # get the number of CPUs
 #
