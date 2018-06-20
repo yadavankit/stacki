@@ -290,9 +290,9 @@ class SwitchArgumentProcessor:
 		# Get the switch's network
 		switch_network = self.db.select("""
 			subnet from networks where node=(
-				select id from nodes where name='%s'
+				select id from nodes where name=%s
 				)
-			""" % switch)
+			""", switch)
 
 		if not switch_network:
 			raise CommandError(self,
@@ -344,12 +344,12 @@ class SwitchArgumentProcessor:
 		query = """
 		insert into switchports
 		(interface, switch, port)
-		values ('%s',
-			(select id from nodes where name = '%s'),
-			'%s')
-		""" % (host_interface[0][0], switch, port)
+		values (%s,
+			(select id from nodes where name = %s),
+			%s)
+		"""
 
-		self.db.execute(' '.join(query.split()))
+		self.db.execute(query, (host_interface[0][0], switch, port))
 
 	def delSwitchHost(self, switch, host):
 		"""Add a host to switch"""
