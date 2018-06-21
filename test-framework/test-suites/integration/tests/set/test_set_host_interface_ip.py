@@ -3,10 +3,8 @@ import os
 import pytest
 import subprocess
 
-@pytest.mark.usefixtures("add_host")
-@pytest.mark.usefixtures("set_host_interface")
 class TestSetHostInterfaceIp:
-	def test_set_host_interface_ip_auto(self, host):
+	def test_set_host_interface_ip_auto(self, host, set_host_interface):
 		"Test if ip=AUTO assigns a valid, unique IP address"
 		
 		hostname  = set_host_interface['host']
