@@ -47,5 +47,5 @@ class Command(stack.commands.add.host.command):
 			if host == self.db.getHostname('localhost'):
 				host = 'localhost'
 
-			tx.sendto(msg.dumps(), (host, stack.mq.ports.publish))
+			tx.sendto(msg.dumps().encode(), (host, stack.mq.ports.publish))
 			tx.close()
