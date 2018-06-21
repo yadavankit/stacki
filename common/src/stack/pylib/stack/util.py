@@ -215,6 +215,7 @@ def prettyNumber(x):
 
 	return size
 
+
 def get_ipmi_mac():
 	"""Get IPMI mac address.
 
@@ -255,5 +256,8 @@ def get_interfaces(skip_interfaces=None):
 				hwaddr = mac.readline().strip()
 				# make this usable in a for loop. Fits better for stacki-profile.py usage
 				yield interface, hwaddr
-	yield "ipmi", get_ipmi_mac()
+	# Pass back ipmi as well, if it exists
+	ipmi_mac = get_ipmi_mac()
+	if ipmi_mac is not None:
+		yield "ipmi", ipmi_mac
 
