@@ -159,7 +159,7 @@ def set_host_interface(add_host):
 	hostname = o[0]["host"]
 
 	result = subprocess.run(
-		["stack", "list", "host", "interface", "output-format=json"]
+		["stack", "list", "host", "interface", "output-format=json"],
 		stdout=subprocess.PIPE,
 		encoding="utf-8",
 		check=True
@@ -177,10 +177,11 @@ def set_host_interface(add_host):
 		ip_list.append(line['ip'])
 
 	result = {
-		'hostname': hostname,
-		'net_addr': addr,
-		'net_mask': mask,
-		'ip_list' : ip_list
+		'hostname' : hostname,
+		'net_addr' : addr,
+		'net_mask' : mask,
+		'interface': interface,
+		'ip_list'  : ip_list
 	}
 
 	return result
