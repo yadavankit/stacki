@@ -25,4 +25,4 @@ then
 	done
 fi
 
-/opt/stack/bin/stacki-status.py install complete rebooting
+/opt/stack/bin/stacki-status.py install reboot

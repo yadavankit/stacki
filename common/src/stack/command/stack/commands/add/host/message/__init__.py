@@ -35,14 +35,15 @@ class Command(stack.commands.add.host.command):
 
 	def run(self, params, args):
 
-		(channel, message) = self.fillParams([
+		(channel, message, source) = self.fillParams([
 			('channel', 'debug', False),
-			('message', None, True)
+			('message', None, True),
+			('source', None, False)
 			])
 
 		for host in self.getHostnames(args):
 			tx  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			msg = stack.mq.Message(channel, message)
+			msg = stack.mq.Message(channel, message, source=source)
 			
 			if host == self.db.getHostname('localhost'):
 				host = 'localhost'
