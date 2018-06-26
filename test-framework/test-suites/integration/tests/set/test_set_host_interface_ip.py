@@ -7,7 +7,7 @@ class TestSetHostInterfaceIp:
 	def test_set_host_interface_ip_auto(self, host, set_host_interface):
 		"Test if ip=AUTO assigns a valid, unique IP address"
 		
-		hostname  = set_host_interface['host']
+		hostname  = set_host_interface['hostname']
 		interface = set_host_interface['interface']
 		ip_list   = set_host_interface['ip_list']
 
