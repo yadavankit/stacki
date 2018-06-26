@@ -86,10 +86,11 @@ class Command(stack.commands.list.command,
 				where scope = 'global'
 				order by enclosure, adapter, slot"""
 		elif scope == 'os':
-			#
-			# not currently supported
-			#
-			return
+
+			query = """select adapter, enclosure, slot, raidlevel, 
+                                arrayid, options from storage_controller where 
+                                scope = "os" and tableid = (select id from oses 
+                                where name = '%s') order by enclosure, adapter, slot""" % args[0]
 		elif scope == 'appliance':
 			query = """select adapter, enclosure, slot,
 				raidlevel, arrayid, options
@@ -112,19 +113,16 @@ class Command(stack.commands.list.command,
 		name = None
 		if scope == 'global':
 			name = 'global'
-		elif scope in [ 'appliance', 'host']:
+		elif scope in [ 'appliance', 'host', 'os']:
 			name = args[0]
 
 		self.beginOutput()
 
 		self.db.execute(query)
 
-		i = 0
 		for row in self.db.fetchall():
 			adapter, enclosure, slot, raidlevel, arrayid, options = row
 
-			if i > 0:
-				name = None
 			if adapter == -1:
 				adapter = None
 			if enclosure == -1:
@@ -140,11 +138,13 @@ class Command(stack.commands.list.command,
 			# Remove leading and trailing double quotes
 			options = options.strip("\"")
 
-			self.addOutput(name, [ enclosure, adapter, slot,
+			self.addOutput(name, [enclosure, adapter, slot,
 				raidlevel, arrayid, options ])
-
-			i += 1
 
 		self.endOutput(header=['scope', 'enclosure', 'adapter', 'slot', 
 			'raidlevel', 'arrayid', 'options' ], trimOwner=False)
 
+
+RollName = "stacki"
+
+RollName = "stacki"
