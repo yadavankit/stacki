@@ -35,22 +35,19 @@ class Implementation(stack.commands.Implementation):
 					bridge_macs[interface_name] = entry
 
 			interfaces = switch.json_loads(cmd="show interface json")
-			for interface_name in switch.sorted_keys(interfaces):
-				if 'swp' in interface_name:
-					try:
-						bridge_mac = bridge_macs[interface_name]
-						mac = bridge_mac['mac']
-						vlan = bridge_mac['vlan']  # should vlan come from FE or switch? Missing from FE atm
+			switch_ports = (interface_name for interface_name in interfaces if 'swp' in interface_name)
+			for interface_name in switch.sorted_keys(switch_ports):
+				try:
+					bridge_mac = bridge_macs[interface_name]
+					mac = bridge_mac['mac']
+					vlan = bridge_mac['vlan']  # should vlan come from FE or switch? Missing from FE atm
 
-						for host_obj in hosts:
-							if host_obj['mac'] == mac:
-								host = host_obj['host']
-								interface = host_obj['interface']
-								break
-						else:
-							host = ''
-							interface = ''
-					except KeyError:
+					for host_obj in hosts:
+						if host_obj['mac'] == mac:
+							host = host_obj['host']
+							interface = host_obj['interface']
+							break
+					else:
 						host = ''
 						interface = ''
 						mac = ''

@@ -28,10 +28,11 @@ class Implementation(stack.commands.Implementation):
 				port = re.search(r'\d+', iface_obj['dev']).group()
 				vlan = iface_obj['vlan']  # should VLAN come from FE or switch?
 
-				for host_obj in hosts:
-					if host_obj['mac'] == mac:
-						host = host_obj['host']
-						interface = host_obj['interface']
+				matching_hosts = (host_obj for host_obj in hosts if host_obj['mac'] == mac)
+				for host_obj in matching_hosts:
+					host = host_obj['host']
+					interface = host_obj['interface']
 
-						self.owner.addOutput(switch_name, [port, mac, host, interface, vlan])
-						break
+					self.owner.addOutput(switch_name, [port, mac, host, interface, vlan])
+					break
+
