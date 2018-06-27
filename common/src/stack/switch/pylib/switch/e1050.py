@@ -11,8 +11,7 @@ class SwitchCelesticaE1050(Switch):
 	"""Class for interfacing with a Celestica e1050 switch running Cumulus Linux.
 	"""
 
-	@staticmethod
-	def natural_sort(s):
+	def natural_sort(self, s):
 		return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
 
 	def rpc_req_text(self, cmd):
@@ -23,9 +22,8 @@ class SwitchCelesticaE1050(Switch):
 
 		return requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text
 
-	@staticmethod
-	def sorted_keys(dct):
-		return sorted(dct, key=natural_sort)
+	def sorted_keys(self, dct):
+		return sorted(dct, key=self.natural_sort)
 
 	def json_loads(self, cmd):
 		return json.loads(self.rpc_req_text(cmd))
