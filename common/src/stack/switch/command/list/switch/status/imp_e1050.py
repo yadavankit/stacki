@@ -24,9 +24,7 @@ class Implementation(stack.commands.Implementation):
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
 			# better names?
 			bridge_macs = {}
-			# TODO: possible to see VLANs for ports not in 'net show bridge macs dynamic'?
-			# This only shows active ports
-			for entry in switch.json_loads(cmd="show bridge macs dynamic json"):
+			for entry in switch.json_loads(cmd="show bridge macs dynamic json"):  # pinghosts=True (broken)
 				interface_name = entry.pop('dev')  # why did they call iface 'dev'?
 				# TODO: clean up formatting
 				if 'swp' in interface_name \
