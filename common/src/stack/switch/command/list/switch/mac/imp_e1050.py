@@ -23,11 +23,10 @@ class Implementation(stack.commands.Implementation):
 		hosts = self.owner.call('list.host.interface', ['output-format=json'])
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
 			# better name(s)?
-			for iface_obj in sorted(switch.json_loads(cmd="show bridge macs dynamic json"), key=lambda d: d['dev']):  # why did they call iface 'dev'?
+			for iface_obj in sorted(switch.json_loads(cmd='show bridge macs dynamic json'), key=lambda d: d['dev']):  # why did they call iface 'dev'?
 				mac = iface_obj['mac']
 				port = re.search(r'\d+', iface_obj['dev']).group()
-				vlan = iface_obj['vlan']  # should VLAN come from FE or switch? Missing from FE atm
-				# multiple VLANs?
+				vlan = iface_obj['vlan']  # should VLAN come from FE or switch?
 
 				for host_obj in hosts:
 					if host_obj['mac'] == mac:
