@@ -48,28 +48,15 @@ class Implementation(stack.commands.Implementation):
 					else:
 						host = ''
 						interface = ''
-						mac = ''
-						vlan = ''
+				except KeyError:
+					host = ''
+					interface = ''
+					mac = ''
+					vlan = ''
 
-					port = re.search(r'\d+', interface_name).group()
-					speed = interfaces[interface_name]['speed']
-					state = interfaces[interface_name]['linkstate']
+				port = re.search(r'\d+', interface_name).group()
+				speed = interfaces[interface_name]['speed']
+				state = interfaces[interface_name]['linkstate']
 
-					self.owner.addOutput(switch_name, [port, speed, state, mac, vlan, host, interface])
+				self.owner.addOutput(switch_name, [port, speed, state, mac, vlan, host, interface])
 
-''' old; current doesn't show inactive ports
-with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
-	data = switch.json_loads("show interface json")
-	for iface in switch.sorted_keys(data):
-		port_match = re.search(r'\d+', iface)
-		info = data[iface]
-		if 'swp' in iface:
-			iface_obj = info['iface_obj']
-
-			port = port_match.group()
-			# mac and interface are for host, but are stored in switch; figure out where
-			# should vlan come from FE or switch?
-			vlan = '' if not iface_obj['vlan'] else iface_obj['vlan'][0]['vlan']  # handle multiple VLANs?
-
-			self.owner.addOutput(switch_name, [port, info['speed'], info['linkstate'], iface_obj['mac'], vlan, '', iface])  # host missing, switch hostfile?
-'''
