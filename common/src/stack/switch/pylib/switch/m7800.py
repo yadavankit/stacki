@@ -3,6 +3,7 @@ import re
 from stack.expectmore import ExpectMore
 from stack.bool import str2bool
 from . import Switch, SwitchException
+from . import mellanoknok
 
 partition_name = re.compile('  [a-z0-9]', re.IGNORECASE)
 members_header = re.compile('  members', re.IGNORECASE)
@@ -48,6 +49,8 @@ class SwitchMellanoxM7800(Switch):
 		]
 
 		self.proc.conversation(login_seq)
+
+		self._api_connection = mellanoknok.Mellanoknok(self.switch_ip_address, password=self.password)
 
 
 	def disconnect(self):
@@ -116,6 +119,11 @@ class SwitchMellanoxM7800(Switch):
 				partitions[cur_partition]['guids'].append(m.group(0))
 
 		return partitions
+
+
+	@property
+	def interfaces(self):
+		return self._api_connection.get_interfaces()
 
 
 	def _validate_pkey(self, pkey):
